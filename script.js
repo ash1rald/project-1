@@ -11,11 +11,6 @@ if (start_quiz) {
 /* Вопросы
 const quiz = [
   {
-    question: "Столица Франции?",
-    answers: ["Берлин", "Париж", "Рим"],
-    correct: 1
-  },
-  {
     question: "Самый большой океан?",
     answers: ["Атлантический", "Тихий", "Индийский"],
     correct: 1
@@ -53,46 +48,43 @@ var score = 0;
 
 // Определяем текущий номер вопроса (если скрипт запущен на странице вопроса)
 var currentQuestion = 0;
-if (window.location.pathname.endsWith('quiz1.html')) {
-  currentQuestion = 1;
+// Определяем номер текущего вопроса из URL
+const quizMatch = window.location.pathname.match(/quiz(\d+)\.html/);
+if (quizMatch) {
+  currentQuestion = parseInt(quizMatch[1], 10);
 }
 
-// Обработчики на странице викторины — добавляем только если элементы существуют
+// Обработчик для правильного ответа
 const correctBtn = document.getElementById('correct');
 if (correctBtn) {
   correctBtn.addEventListener('click', function() {
-    // Получаем текущий счёт из localStorage (если есть), увеличиваем и сохраняем
+    // Получаем текущий счёт из localStorage, увеличиваем и сохраняем
     const stored = parseInt(localStorage.getItem('quiz_score') || '0', 10);
     const newScore = stored + 1;
     localStorage.setItem('quiz_score', String(newScore));
     score = newScore;
     console.log('Текущий счет: ' + score);
-    // Переход на страницу-результат в той же папке Pages
-    if (window.location.pathname.endsWith('quiz1.html')) {
-        window.location.href = 'quiz1-correct.html';
-    }
-    
+    // Переход на страницу результата (используем текущий номер вопроса)
+    window.location.href = 'quiz' + currentQuestion + '-correct.html';
   });
 }
 
-// На странице несколько кнопок с id="incorrect" (в текущем HTML они повторяются).
-// Выбираем все элементы с таким id и вешаем обработчик на каждый.
+// Обработчик для неправильных ответов
 const incorrectBtns = document.querySelectorAll('#incorrect');
 if (incorrectBtns.length) {
   incorrectBtns.forEach(btn => {
     btn.addEventListener('click', function() {
-      // Сохраняем текущий счёт (не увеличиваем) и оставляем пользователя на странице
+      // Сохраняем текущий счёт (не увеличиваем)
       const stored = parseInt(localStorage.getItem('quiz_score') || '0', 10);
       localStorage.setItem('quiz_score', String(stored));
       console.log('Текущий счет (неправильный ответ): ' + stored);
-      // Переход на страницу с информацией о неправильном ответе
-      if (window.location.pathname.endsWith('quiz1.html')) {
-
-        window.location.href = 'quiz1-incorrect.html';
-      }
+      // Переход на страницу результата неправильного ответа
+      window.location.href = 'quiz' + currentQuestion + '-incorrect.html';
     });
   });
 }
+
+
 
 
 
@@ -136,5 +128,22 @@ if (next_question_btn) {
     } else {
       window.location.href = 'main.html';
     }
+  });
+}
+
+// Отображение финального счета на странице финального результата
+const finalScoreDisplay = document.getElementById('final_score_display');
+if (finalScoreDisplay && window.location.pathname.includes('final_result.html')) {
+  const stored = parseInt(localStorage.getItem('quiz_score') || '0', 10);
+  finalScoreDisplay.textContent = 'Ваш финальный результат: ' + stored;
+}
+
+var restart_btn = document.getElementById('restart_quiz');
+if (restart_btn) {
+  restart_btn.addEventListener('click', function() {
+    // Сбрасываем сохранённый счёт при старте новой игры
+    localStorage.setItem('quiz_score', '0');
+    // Возвращаемся на главную (с относительным путём из Pages)
+    window.location.href = '../main.html';
   });
 }
