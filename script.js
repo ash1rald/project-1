@@ -8,41 +8,6 @@ if (start_quiz) {
   });
 }
 
-/* Вопросы
-const quiz = [
-  {
-    question: "Самый большой океан?",
-    answers: ["Атлантический", "Тихий", "Индийский"],
-    correct: 1
-  },
-  {
-    question: "Самая высокая гора в мире?",
-    answers: ["Эльбрус", "Монблан", "Эверест"],
-    correct: 2
-  },
-  {
-    question: "На каком материке находится Украина?",
-    answers: ["Азия", "Европа", "Африка"],
-    correct: 1
-  },
-  {
-    question: "Какая страна имеет форму сапога?",
-    answers: ["Испания", "Италия", "Греция"],
-    correct: 1
-  },
-  {
-    question: "Самая длинная река в мире?",
-    answers: ["Амазонка", "Нил", "Янцзы"],
-    correct: 1
-  },
-  {
-    question: "Столица Японии?",
-    answers: ["Осака", "Киото", "Токио"],
-    correct: 2
-  }
-];
-*/
-
 
 var score = 0;
 
@@ -113,11 +78,22 @@ if (next_question_btn) {
         if (res.ok) {
           window.location.href = nextUrl;
         } else {
-          window.location.href = 'final_result.html';
+          // Проверяем счет перед показом итогов
+          const finalScore = parseInt(localStorage.getItem('quiz_score') || '0', 10);
+          if (finalScore > 8) {
+            window.location.href = 'cheater.html';
+          } else {
+            window.location.href = 'final_result.html';
+          }
         }
       }).catch(() => {
-        // В окружении file:// fetch может упасть — всё равно пробуем перейти
-        window.location.href = nextUrl;
+        // В окружении file:// fetch может упасть — пробуем перейти, но сначала проверяем счет
+        const finalScore = parseInt(localStorage.getItem('quiz_score') || '0', 10);
+        if (finalScore > 8) {
+          window.location.href = 'cheater.html';
+        } else {
+          window.location.href = nextUrl;
+        }
       });
       return;
     }
@@ -136,6 +112,7 @@ const finalScoreDisplay = document.getElementById('final_score_display');
 if (finalScoreDisplay && window.location.pathname.includes('final_result.html')) {
   const stored = parseInt(localStorage.getItem('quiz_score') || '0', 10);
   finalScoreDisplay.textContent = 'Ваш финальный результат: ' + stored;
+  finalScoreDisplay.className = 'final-score'; // Добавляем класс для стилизации
 }
 
 var restart_btn = document.getElementById('restart_quiz');
